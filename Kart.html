@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid de Largada</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Grid de Largada</h1>
+
+    <form id="kartForm">
+        <label for="kartNumber">Número do Kart:</label>
+        <input type="number" id="kartNumber" required>
+        <label for="pilotName">Nome do Piloto:</label>
+        <input type="text" id="pilotName" required>
+        <button type="button" onclick="addKart()">Adicionar Kart</button>
+        <button type="button" onclick="calculateResults()">Calcular Resultados</button>
+    </form>
+
+    <table id="kartTable">
+        <tr>
+            <th>Número do Kart</th>
+            <th>Nome do Piloto</th>
+            <th>Volta 1 (s)</th>
+            <th>Volta 2 (s)</th>
+            <th>Volta 3 (s)</th>
+            <th>Média de Tempo (s)</th>
+        </tr>
+    </table>
+
+    <h2>Resultados</h2>
+
+    <div id="results"></div>
+
+    <script>
+        const kartData = [];
+
+        function generateRandomTime() {
+            return (Math.random() * (60 - 40) + 40).toFixed(2); 
+        }
+
+        function addKart() {
+            const kartNumber = document.getElementById("kartNumber").value;
+            const pilotName = document.getElementById("pilotName").value;
+
+            const kart = {
+                kartNumber: kartNumber,
+                pilotName: pilotName,
+                lapTimes: [generateRandomTime(), generateRandomTime(), generateRandomTime()],
+                averageTime: 0
+            };
+
+            kart.averageTime = kart.lapTimes.reduce((total, time) => total + parseFloat(time), 0) / 3;
+            kartData.push(kart);
+
+            document.getElementById("kartForm").reset();
+            updateTable();
+        }
+
+        function updateTable() {
+            const kartTable = document.getElementById("kartTable");
+            kartTable.innerHTML = `
+                <tr>
+                    <th>Número do Kart</th>
+                    <th>Nome do Piloto</th>
+                    <th>Volta 1 (s)</th>
+                    <th>Volta 2 (s)</th>
+                    <th>Volta 3 (s)</th>
+                    <th>Média de Tempo (s)</th>
+                </tr>
+            `;
+
+            kartData.forEach((kart) => {
+                const row = kartTable.insertRow();
+                row.insertCell(0).textContent = kart.kartNumber;
+                row.insertCell(1).textContent = kart.pilotName;
+                for (let i = 0; i < 3; i++) {
+                    row.insertCell(i + 2).textContent = kart.lapTimes[i];
+                }
+                row.insertCell(5).textContent = kart.averageTime.toFixed(2);
+            });
+        }
+
+        function calculateResults() {
+
+            kartData.sort((a, b) => a.averageTime - b.averageTime);
+
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = `
+                <p><strong>Nome do piloto e tempo médio do carro que estará na pole-position:</strong> ${kartData[0].pilotName} - ${kartData[0].averageTime.toFixed(2)} segundos</p>
+                <p><strong>Número do carro que largará em último:</strong> ${kartData[kartData.length - 1].kartNumber}</p>
+                <p><strong>Nome do piloto que fez a volta mais rápida:</strong> ${kartData[0].pilotName} - ${Math.min(...kartData[0].lapTimes).toFixed(2)} segundos</p>
+                <p><strong>Número do carro que fez a volta mais lenta:</strong> ${kartData[kartData.length - 1].kartNumber} - ${Math.max(...kartData[kartData.length - 1].lapTimes).toFixed(2)} segundos</p>
+            `;
+
+            updateTable();
+        }
+    </script>
+
+</body>
+</html>
